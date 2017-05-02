@@ -1,0 +1,16 @@
+{
+  "name": "emotobooth-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "Gavin Williams <gav@quander.io> (http://quander.io)",
+  "license": "ISC",
+  "dependencies": {
+    "chokidar": "^1.6.1",
+    "queue": "^4.2.1",
+    "unirest": "^0.5.1"
+  }
+}
