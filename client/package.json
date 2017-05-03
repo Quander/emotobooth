@@ -10,7 +10,10 @@
   "license": "ISC",
   "dependencies": {
     "chokidar": "^1.6.1",
+    "debug": "^2.6.6",
     "queue": "^4.2.1",
-    "unirest": "^0.5.1"
+    "twilio": "^2.11.1",
+    "unirest": "^0.5.1",
+    "winston": "^2.3.1"
   }
 }
