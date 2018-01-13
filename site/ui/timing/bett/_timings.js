@@ -85,20 +85,8 @@ export const STATES_MULTIPLE_FACES = [
 
 export const STATES_AURA_SINGLE = [
   {
-    NAME: 'animateInBackground',
+    NAME: 'animateInFrame',
     DURATION: 1
-  },
-  {
-    NAME: 'animateInVignette',
-    DURATION: 2
-  },
-  {
-    NAME: 'animateInHalo',
-    DURATION: 3
-  },
-  {
-    NAME: 'chrome',
-    DURATION: 2
   }
 ];
 

@@ -20,7 +20,7 @@ export default class BackgroundStep {
     this.circleStarted = false;
 
     this.canvasUtils = new canvasUtils(imageElement, canvas, context);
-    
+
     this.animateInBackground(duration);
   }
 
@@ -33,12 +33,10 @@ export default class BackgroundStep {
 
   animateInBackgroundFrame(progress = 1) {
     this.context.save();
-
     this.canvasUtils.redrawBaseImage();
 
     this.canvasUtils.createShapeBackground(progress);
 
-    
     if (!this.circleStarted && progress !== 1) {
       this.circleStarted = true;
       this.canvasUtils.drawCircle();

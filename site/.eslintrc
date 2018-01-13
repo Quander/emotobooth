@@ -14,6 +14,7 @@
     "no-var": 2,
     "prefer-const": 2,
     "prefer-template": 2,
-    "template-curly-spacing": [2, "always"]
+    "template-curly-spacing": [2, "always"],
+    "no-console": ["error", { "allow": ["warn", "error", "info"] }]
   }
 }

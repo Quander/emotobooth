@@ -12,10 +12,12 @@ import * as animationUtils from '../_animationUtils';
 import * as faceUtils from '../_faceUtils';
 import flashStep from './steps/_flashStep';
 import EmotionStep from './steps/_emotionStep';
-import groupCircleStep from './steps/horizon/_groupCircleStep';
-import backgroundStep from './steps/horizon/_backgroundStep';
-import multiAuraStep from './steps/horizon/_multiAuraStep';
-import haloStep from './steps/horizon/_haloStep';
+import groupCircleStep from './steps/bett/_groupCircleStep';
+import backgroundStep from './steps/bett/_backgroundStep';
+import multiAuraStep from './steps/bett/_multiAuraStep';
+import haloStep from './steps/bett/_haloStep';
+import FrameStep from './steps/bett/_frameStep';
+import chromeStep from './steps/next/_chromeStep';
 
 const Timeline = require('gsap/src/minified/TimelineMax.min');
 
@@ -270,12 +272,20 @@ export default class ImageElement extends PanelComponent {
         this.emotionStep = new EmotionStep(this, this.canvas, this.context, duration);
     }
 
+    chrome(duration = 0) {
+        this.chromeStep = new chromeStep(this, this.canvas, this.context, duration);
+    }
+
     animateInBackground(duration = 0) {
         if (this.facesAndEmotions.length !== 1) {
             this.groupCircleStep = new groupCircleStep(this, this.canvas, this.context, duration);
         } else {
             this.backgroundStep = new backgroundStep(this, this.canvas, this.context, duration);
         }
+    }
+
+    animateInFrame(duration = 0) {
+        this.frameStep = new FrameStep(this, this.canvas, this.context, duration);
     }
 
     animateInHalo(duration = 0) {
