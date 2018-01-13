@@ -32,7 +32,7 @@ export default class CanvasUtils {
     this.pointUtils = new pointUtils(imageElement);
 
     this.shapeScale = 1;
-    
+
     if (single) {
       this.shapeScale = 2;
     }
@@ -514,7 +514,7 @@ export default class CanvasUtils {
 
     let circleOffset = CIRCLE_OFFSET;
     if (group) {
-      circleOffset = CIRCLE_GROUP_OFFSET; 
+      circleOffset = CIRCLE_GROUP_OFFSET;
     }
 
     this.imageElement.context.save();
@@ -589,7 +589,7 @@ export default class CanvasUtils {
         this.imageElement.shapesInit = true;
 
         this.circleAnim = 0;
-        
+
         let timing = 1.5;
 
         if (progress === 1) {

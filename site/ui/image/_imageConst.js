@@ -13,5 +13,6 @@ export const LOGO_HEIGHT = 43;
 
 export const EVENT_NAME_NEXT = 'next';
 export const EVENT_NAME_HORIZON = 'horizon';
+export const EVENT_NAME_BETT = 'bett';
 
 export const TOTAL_CIRCLE_FRAMES = 75;

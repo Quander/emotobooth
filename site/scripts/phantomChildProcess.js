@@ -6,7 +6,13 @@ var args = require('system').args;
 page.onConsoleMessage = function(msg) {
   console.log('console: ' + msg);
 };
+
+
+console.log('Rendering!!!', args);
+
 page.open('http://localhost:8080/single?timing=' + args[3] + '&', function(status) {
+
+
   if(status === "success") {
     if (page.injectJs(args[1])) {
       setTimeout(function() {

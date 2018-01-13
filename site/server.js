@@ -49,7 +49,7 @@ try {
 } catch (e) {
   throw "No config.js file found. Please follow the format in config.js.example";
 }
- 
+
 if (!config.api_key) {
   throw "You need an API key in config.js in order to run this program. Please add to config.js";
 }
@@ -535,8 +535,15 @@ function getVisionData(job, finish) {
       },
       json: jsonData
     }, (err, response, body) => {
-      fs.writeFile(path.join(config.outDir, job.data.id + '-resp.json'), JSON.stringify(body), (err) => {
-        console.log('There was an error while recieving response data', err);
+      fs.writeFile(path.join(config.outDir, `${job.data.id}-resp.json`), JSON.stringify(body), (err) => {
+
+        if (err !== null) {
+            console.log('There was an error while receiving response data', err);
+            return;
+        } else {
+            console.log('Received response data from Vision API data');
+        }
+
         job.data.respPath = path.join(config.outDir, job.data.id + '-resp.json');
         finish(job.data);
       });
@@ -631,7 +638,7 @@ function processFinalImages(sess) {
 
     // First push the scored images
     for (let key in sess) {
-      if(sess[key].wasProcessed) {        
+      if(sess[key].wasProcessed) {
         if (sess[key].score > 1) {
           scoredPhotos.push({key: key, score: sess[key].score});
         }
@@ -649,7 +656,7 @@ function processFinalImages(sess) {
           numberOfFaces = sess[key].faces;
         }
       }
-      if(sess[key].wasProcessed) {        
+      if(sess[key].wasProcessed) {
         if (sess[key].score <= 1) {
           let scoreNum = sess[key].score;
           scoredPhotos.push({key: key, score: scoreNum});

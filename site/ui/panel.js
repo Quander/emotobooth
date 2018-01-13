@@ -4,11 +4,14 @@
 
 import nextImageElement from './image/imageElementNext';
 import horizonImageElement from './image/imageElementHorizon';
+import bettImageElement from './image/imageElementBett';
+
 import JsonElement from './jsonElement';
 
 import {
-  EVENT_NAME_NEXT,
-  EVENT_NAME_HORIZON
+    EVENT_NAME_NEXT,
+    EVENT_NAME_HORIZON,
+    EVENT_NAME_BETT
 } from './image/_imageConst';
 
 export default class Panel {
@@ -35,6 +38,10 @@ export default class Panel {
       this.image = new horizonImageElement(this.imagePath, this.respPath, () => {
          this.imageIsReady();
       });
+    } else if (this.eventName === EVENT_NAME_BETT) {
+      this.image = new bettImageElement(this.imagePath, this.respPath, () => {
+        this.imageIsReady()
+      })
     }
 
     this.jsonElement = new JsonElement(this.reqPath, this.respPath);
