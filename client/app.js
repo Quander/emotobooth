@@ -22,7 +22,7 @@ var failed = 0
 
 function upload(file, callback) {
 
-  unirest.post('http://130.211.97.71:8080/photo')
+  unirest.post('http://localhost:8080/photo')
     .field('username', 'user')
     .field('password', 'pass123')
     .attach('photo', file)
