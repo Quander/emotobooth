@@ -1,4 +1,4 @@
-/* global require, console */
+/* global require */
 
 const Timeline = require('gsap/src/minified/TimelineMax.min');
 
@@ -14,6 +14,7 @@ export default class FrameStep {
         this.killAnimation = false;
         this.canvasUtils = new CanvasUtils(imageElement, canvas, context);
         this.borderWidth = 28;
+        this.circlePadding = 50;
 
         this.draw(duration);
 
@@ -34,7 +35,10 @@ export default class FrameStep {
 
         this.canvasUtils.redrawCurrentCanvas();
 
-        const height = this.canvas.height;
+        if(duration === 0) {
+            this.drawFrame(1);
+            return;
+        }
 
         const timeline = new Timeline({
             onComplete: () => {
@@ -50,11 +54,8 @@ export default class FrameStep {
                 this.imageElement.tweens.push(currActive);
             },
             onUpdate: () => {
-                this.canvasUtils.redrawCurrentCanvas();
                 const progress = currActive.progress();
-                this.drawOverlay(progress, height);
-                this.drawDots(progress, height);
-                this.drawBorder(progress, height);
+                this.drawFrame(progress);
             }
         });
 
@@ -62,7 +63,18 @@ export default class FrameStep {
 
     }
 
-    drawDots(progress, height = 112, callback = null) {
+    drawFrame(progress = 1) {
+
+        const height = this.canvas.height;
+
+        this.canvasUtils.redrawCurrentCanvas();
+        this.drawOverlay(progress, height);
+        this.drawDots(progress, height);
+        this.cutHole(progress);
+        this.drawBorder(progress, height);
+    }
+
+    drawDots(progress, height = 112) {
 
         const width = this.canvas.width;
 
@@ -84,21 +96,40 @@ export default class FrameStep {
 
         }
 
-
-        if(callback) {
-            callback();
-        }
-
     }
 
     drawOverlay(progress, height = 112) {
         const alpha = 0.56 * progress;
         const color = `rgba(255, 255, 255, ${ alpha })`;
         this.context.save();
+        this.context.beginPath();
         this.context.rect(0, 0, this.canvas.width, height);
         this.context.fillStyle = color;
         this.context.fill();
+        this.context.closePath();
         this.context.restore();
+    }
+
+    cutHole(progress = 0) {
+
+        this.context.save();
+        this.context.beginPath();
+
+        const bounds = this.imageElement.faceBounds;
+        const scale = this.canvas.width / this.imageElement.width;
+        const width = (bounds.right - bounds.left) * scale;
+
+        const x = this.imageElement.eyesMidpoint.x;
+        const y = this.imageElement.eyesMidpoint.y;
+
+        const radius = ((width / 2) + this.circlePadding) * progress;
+
+        this.context.arc(x, y, radius, 2 * Math.PI, false);
+        this.context.fill();
+
+        this.context.closePath();
+        this.context.restore();
+
     }
 
     drawDot(x, y, radius, color = 'rgba(170, 170, 170, 1)') {
@@ -108,22 +139,21 @@ export default class FrameStep {
         this.context.arc(x, y, radius, 0, 2 * Math.PI, false);
         this.context.fillStyle = color;
         this.context.fill();
+        this.context.closePath();
         this.context.restore();
     }
 
-    drawBorder(progress, height = 112, callback = null) {
-        console.info(this.context);
+    drawBorder(progress, height = 112) {
+
         this.context.save();
+        this.context.beginPath();
         this.context.globalCompositeOperation = 'source-over';
         this.context.rect(0, 0, this.canvas.width, height);
         this.context.strokeStyle = '#000000';
         this.context.lineWidth = this.borderWidth;
         this.context.stroke();
+        this.context.closePath();
         this.context.restore();
-
-        if(callback) {
-            callback();
-        }
 
     }
 

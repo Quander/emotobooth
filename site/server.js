@@ -730,7 +730,7 @@ function saveSession(sess, id) {
 }
 
 function runPhantom(childArgs, incompleteSession) {
-  console.log('RUN PHANTOM');
+  console.log('RUN PHANTOM', phantomBinPath, childArgs);
   cp.execFile(phantomBinPath, childArgs,
     (err, stdout, stderr) => {
       //console.log('complete');

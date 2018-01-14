@@ -319,7 +319,7 @@
 	  zoom = window.location.href.includes('zoom');
 	  controls = window.location.href.includes('controls');
 	  showGrid = window.location.href.includes('showgrid');
-	  eventName = !window.location.href.includes('event') ? 'horizon' : window.location.href.split('event=')[1].split('&')[0].split('?')[0];
+	  eventName = !window.location.href.includes('event') ? 'bett' : window.location.href.split('event=')[1].split('&')[0].split('?')[0];
 	  timingsType = !window.location.href.includes('timing') ? 'normal' : window.location.href.split('timing=')[1].split('&')[0];
 	  dontPrint = window.location.href.includes('dontprint');
 	
@@ -9615,7 +9615,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	/* global require, console */
+	/* global require */
 	
 	var Timeline = __webpack_require__(14);
 	
@@ -9629,6 +9629,7 @@
 	        this.killAnimation = false;
 	        this.canvasUtils = new _canvasUtils2.default(imageElement, canvas, context);
 	        this.borderWidth = 28;
+	        this.circlePadding = 50;
 	
 	        this.draw(duration);
 	    }
@@ -9655,7 +9656,10 @@
 	
 	            this.canvasUtils.redrawCurrentCanvas();
 	
-	            var height = this.canvas.height;
+	            if (duration === 0) {
+	                this.drawFrame(1);
+	                return;
+	            }
 	
 	            var timeline = new Timeline({
 	                onComplete: function onComplete() {
@@ -9671,21 +9675,31 @@
 	                    _this.imageElement.tweens.push(currActive);
 	                },
 	                onUpdate: function onUpdate() {
-	                    _this.canvasUtils.redrawCurrentCanvas();
 	                    var progress = currActive.progress();
-	                    _this.drawOverlay(progress, height);
-	                    _this.drawDots(progress, height);
-	                    _this.drawBorder(progress, height);
+	                    _this.drawFrame(progress);
 	                }
 	            });
 	
 	            this.imageElement.timelines.push(timeline);
 	        }
 	    }, {
+	        key: 'drawFrame',
+	        value: function drawFrame() {
+	            var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	
+	
+	            var height = this.canvas.height;
+	
+	            this.canvasUtils.redrawCurrentCanvas();
+	            this.drawOverlay(progress, height);
+	            this.drawDots(progress, height);
+	            this.cutHole(progress);
+	            this.drawBorder(progress, height);
+	        }
+	    }, {
 	        key: 'drawDots',
 	        value: function drawDots(progress) {
 	            var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 112;
-	            var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 	
 	
 	            var width = this.canvas.width;
@@ -9706,10 +9720,6 @@
 	                    this.drawDot(offset + colI * (hSpacing + radius * 2), rowI * (vSpacing + radius * 2), radius, 'rgba(170, 170, 170, ' + progress + ')');
 	                }
 	            }
-	
-	            if (callback) {
-	                callback();
-	            }
 	        }
 	    }, {
 	        key: 'drawOverlay',
@@ -9719,9 +9729,35 @@
 	            var alpha = 0.56 * progress;
 	            var color = 'rgba(255, 255, 255, ' + alpha + ')';
 	            this.context.save();
+	            this.context.beginPath();
 	            this.context.rect(0, 0, this.canvas.width, height);
 	            this.context.fillStyle = color;
 	            this.context.fill();
+	            this.context.closePath();
+	            this.context.restore();
+	        }
+	    }, {
+	        key: 'cutHole',
+	        value: function cutHole() {
+	            var progress = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+	
+	
+	            this.context.save();
+	            this.context.beginPath();
+	
+	            var bounds = this.imageElement.faceBounds;
+	            var scale = this.canvas.width / this.imageElement.width;
+	            var width = (bounds.right - bounds.left) * scale;
+	
+	            var x = this.imageElement.eyesMidpoint.x;
+	            var y = this.imageElement.eyesMidpoint.y;
+	
+	            var radius = (width / 2 + this.circlePadding) * progress;
+	
+	            this.context.arc(x, y, radius, 2 * Math.PI, false);
+	            this.context.fill();
+	
+	            this.context.closePath();
 	            this.context.restore();
 	        }
 	    }, {
@@ -9735,26 +9771,24 @@
 	            this.context.arc(x, y, radius, 0, 2 * Math.PI, false);
 	            this.context.fillStyle = color;
 	            this.context.fill();
+	            this.context.closePath();
 	            this.context.restore();
 	        }
 	    }, {
 	        key: 'drawBorder',
 	        value: function drawBorder(progress) {
 	            var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 112;
-	            var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 	
-	            console.info(this.context);
+	
 	            this.context.save();
+	            this.context.beginPath();
 	            this.context.globalCompositeOperation = 'source-over';
 	            this.context.rect(0, 0, this.canvas.width, height);
 	            this.context.strokeStyle = '#000000';
 	            this.context.lineWidth = this.borderWidth;
 	            this.context.stroke();
+	            this.context.closePath();
 	            this.context.restore();
-	
-	            if (callback) {
-	                callback();
-	            }
 	        }
 	    }]);
 	
@@ -10691,13 +10725,13 @@
 	// All times are in seconds
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
 	
 	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
-	  NAME: 'zoomOut',
-	  DURATION: 0
+	    NAME: 'zoomOut',
+	    DURATION: 0
 	}];
 	
 	// times are in seconds.
@@ -10706,28 +10740,13 @@
 	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [];
 	
 	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
-	  NAME: 'animateInBackground',
-	  DURATION: 0
-	}, {
-	  NAME: 'animateInVignette',
-	  DURATION: 0
-	}, {
-	  NAME: 'animateInHalo',
-	  DURATION: 0
-	}, {
-	  NAME: 'chrome',
-	  DURATION: 0
+	    NAME: 'animateInFrame',
+	    DURATION: 0
 	}];
 	
 	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
-	  NAME: 'animateInMultiAura',
-	  DURATION: 0
-	}, {
-	  NAME: 'pause',
-	  DURATION: 0
-	}, {
-	  NAME: 'chrome',
-	  DURATION: 0
+	    NAME: 'animateInFrame',
+	    DURATION: 0
 	}];
 
 /***/ },
@@ -11557,34 +11576,37 @@
 	// All times are in seconds
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
-	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [];
+	var STATES_INIT_FACE = exports.STATES_INIT_FACE = [{
+	    NAME: 'animateInFrame',
+	    DURATION: 0
+	}];
 	
 	var STATES_FINAL_FACE = exports.STATES_FINAL_FACE = [{
-	  NAME: 'zoomOut',
-	  DURATION: 0
+	    NAME: 'animateInFrame',
+	    DURATION: 0
 	}];
 	
 	// times are in seconds.
-	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [];
+	var STATES_SINGLE_FACE = exports.STATES_SINGLE_FACE = [{
+	    NAME: 'animateInFrame',
+	    DURATION: 0
+	}];
 	
-	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [];
+	var STATES_MULTIPLE_FACES = exports.STATES_MULTIPLE_FACES = [{
+	    NAME: 'animateInFrame',
+	    DURATION: 0
+	}];
 	
 	var STATES_AURA_SINGLE = exports.STATES_AURA_SINGLE = [{
-	  NAME: 'animateInBackground',
-	  DURATION: 0
-	}, {
-	  NAME: 'animateInVignette',
-	  DURATION: 0
-	}, {
-	  NAME: 'animateInHalo',
-	  DURATION: 0
+	    NAME: 'animateInFrame',
+	    DURATION: 0
 	}];
 	
 	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
-	  NAME: 'animateInMultiAura',
-	  DURATION: 0
+	    NAME: 'animateInFrame',
+	    DURATION: 0
 	}];
 
 /***/ },
@@ -11765,14 +11787,8 @@
 	}];
 	
 	var STATES_AURA_MULTIPLE = exports.STATES_AURA_MULTIPLE = [{
-	  NAME: 'animateInMultiAura',
+	  NAME: 'animateInFrame',
 	  DURATION: 1
-	}, {
-	  NAME: 'pause',
-	  DURATION: 0.5
-	}, {
-	  NAME: 'chrome',
-	  DURATION: 2
 	}];
 
 /***/ },

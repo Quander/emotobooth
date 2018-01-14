@@ -7,8 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --watch",
     "start": "webpack-dev-server -d --inline --content-base build --host 0.0.0.0",
-    "start-server": "nodemon --ignore out server.js",
+    "start-server": "nodemon server.js",
     "dist": "NODE_ENV=production webpack -p"
+  },
+  "nodemonConfig": {
+    "ignore": ["in/*", "out/*", "build/*"]
   },
   "author": "Instrument",
   "repository": {

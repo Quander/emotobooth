@@ -91,16 +91,8 @@ export const STATES_AURA_SINGLE = [
 ];
 
 export const STATES_AURA_MULTIPLE = [
-  {
-    NAME: 'animateInMultiAura',
-    DURATION: 1
-  },
-  {
-    NAME: 'pause',
-    DURATION: 0.5
-  },
-  {
-    NAME: 'chrome',
-    DURATION: 2
-  }
+    {
+        NAME: 'animateInFrame',
+        DURATION: 1
+    }
 ];
