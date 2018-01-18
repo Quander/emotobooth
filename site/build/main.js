@@ -9811,9 +9811,10 @@
 	            this.context.save();
 	            this.context.beginPath();
 	
-	            var y = this.scaled(2200);
 	            var width = this.scaled(1000);
 	            var height = this.scaled(150);
+	
+	            var y = this.canvas.height - (this.scaled(100) + height);
 	
 	            var emotions = this.mapEmotions(this.imageElement.facesAndStrongestEmotions);
 	
@@ -9855,6 +9856,9 @@
 	                    this.drawResultBars(this.context, iconX, y, iconWidth, emotions.levels[emotion]);
 	                }
 	
+	                console.log(iconY);
+	                console.log(this.canvas.height);
+	
 	                index++;
 	            }
 	
@@ -9870,18 +9874,25 @@
 	            var bPadding = this.scaled(20);
 	            var bars = result / 20;
 	
-	            context.save();
-	            context.beginPath();
-	
 	            for (var i = 0; i < bars; i++) {
+	
+	                context.save();
+	                context.beginPath();
+	
 	                var barY = i === 0 ? y - (height + bMargin) : y - (height + bMargin) - (height + bPadding) * i;
 	                context.rect(x, barY, width, height);
 	                context.fillStyle = '#000000';
-	                context.fill();
-	            }
 	
-	            context.closePath();
-	            context.restore();
+	                context.shadowOffsetX = 5;
+	                context.shadowOffsetY = 5;
+	                context.shadowBlur = 10;
+	                context.shadowColor = 'rgba(0, 0, 0, 0.5)';
+	
+	                context.fill();
+	
+	                context.closePath();
+	                context.restore();
+	            }
 	        }
 	    }, {
 	        key: 'mapEmotions',
@@ -9923,7 +9934,7 @@
 	                }
 	            }
 	
-	            output.barColor = dominant.emotion === 'unknown' ? '#FFFFFF' : this.emotions[dominant.emotion].color;
+	            output.barColor = dominant.emotion === 'unknown' ? '#000000' : this.emotions[dominant.emotion].color;
 	
 	            return output;
 	        }

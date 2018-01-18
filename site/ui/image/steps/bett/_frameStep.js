@@ -163,9 +163,10 @@ export default class FrameStep {
         this.context.save();
         this.context.beginPath();
 
-        const y = this.scaled(2200);
         const width = this.scaled(1000);
         const height = this.scaled(150);
+
+        const y = this.canvas.height - (this.scaled(100) + height);
 
         const emotions = this.mapEmotions(this.imageElement.facesAndStrongestEmotions);
 
@@ -207,6 +208,9 @@ export default class FrameStep {
                 this.drawResultBars(this.context, iconX, y, iconWidth, emotions.levels[emotion]);
             }
 
+            console.log(iconY);
+            console.log(this.canvas.height);
+
             index++;
 
         }
@@ -223,18 +227,28 @@ export default class FrameStep {
         const bPadding = this.scaled(20);
         const bars = result / 20;
 
-        context.save();
-        context.beginPath();
 
         for(let i = 0; i < bars; i++) {
+
+            context.save();
+            context.beginPath();
+
             const barY = (i === 0) ? y - (height + bMargin) : (y - (height + bMargin)) - ((height + bPadding) * i);
             context.rect(x, barY, width, height);
             context.fillStyle = '#000000';
+
+            context.shadowOffsetX = 5;
+            context.shadowOffsetY = 5;
+            context.shadowBlur= 10;
+            context.shadowColor = 'rgba(0, 0, 0, 0.5)';
+
             context.fill();
+
+            context.closePath();
+            context.restore();
+
         }
 
-        context.closePath();
-        context.restore();
     }
 
     mapEmotions(faceAndEmotions) {
@@ -276,7 +290,7 @@ export default class FrameStep {
             }
         }
 
-        output.barColor = (dominant.emotion === 'unknown') ? '#FFFFFF' : this.emotions[dominant.emotion].color;
+        output.barColor = (dominant.emotion === 'unknown') ? '#000000' : this.emotions[dominant.emotion].color;
 
         return output;
     }
