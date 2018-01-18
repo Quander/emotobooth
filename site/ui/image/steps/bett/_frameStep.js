@@ -156,8 +156,6 @@ export default class FrameStep {
 
         this.context.drawImage(this.bettFrame, x - ((width + (this.circlePadding * 2)) / 2), y - ((width + (this.circlePadding * 2)) / 2), width + (this.circlePadding * 2), width + (this.circlePadding * 2));
 
-
-
     }
 
     drawResults(/*progress = 0*/) {
@@ -205,6 +203,10 @@ export default class FrameStep {
             // Draw the faces
             this.context.drawImage(icon, iconX, iconY, iconWidth, iconHeight);
 
+            if(emotions.levels[emotion] > 0) {
+                this.drawResultBars(this.context, iconX, y, iconWidth, emotions.levels[emotion]);
+            }
+
             index++;
 
         }
@@ -212,6 +214,27 @@ export default class FrameStep {
         this.context.closePath();
         this.context.restore();
 
+    }
+
+    drawResultBars(context, x, y, width, result) {
+
+        const height = this.scaled(20);
+        const bMargin = this.scaled(30);
+        const bPadding = this.scaled(20);
+        const bars = result / 20;
+
+        context.save();
+        context.beginPath();
+
+        for(let i = 0; i < bars; i++) {
+            const barY = (i === 0) ? y - (height + bMargin) : (y - (height + bMargin)) - ((height + bPadding) * i);
+            context.rect(x, barY, width, height);
+            context.fillStyle = '#000000';
+            context.fill();
+        }
+
+        context.closePath();
+        context.restore();
     }
 
     mapEmotions(faceAndEmotions) {

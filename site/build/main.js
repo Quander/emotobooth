@@ -9851,11 +9851,37 @@
 	                // Draw the faces
 	                this.context.drawImage(icon, iconX, iconY, iconWidth, iconHeight);
 	
+	                if (emotions.levels[emotion] > 0) {
+	                    this.drawResultBars(this.context, iconX, y, iconWidth, emotions.levels[emotion]);
+	                }
+	
 	                index++;
 	            }
 	
 	            this.context.closePath();
 	            this.context.restore();
+	        }
+	    }, {
+	        key: 'drawResultBars',
+	        value: function drawResultBars(context, x, y, width, result) {
+	
+	            var height = this.scaled(20);
+	            var bMargin = this.scaled(30);
+	            var bPadding = this.scaled(20);
+	            var bars = result / 20;
+	
+	            context.save();
+	            context.beginPath();
+	
+	            for (var i = 0; i < bars; i++) {
+	                var barY = i === 0 ? y - (height + bMargin) : y - (height + bMargin) - (height + bPadding) * i;
+	                context.rect(x, barY, width, height);
+	                context.fillStyle = '#000000';
+	                context.fill();
+	            }
+	
+	            context.closePath();
+	            context.restore();
 	        }
 	    }, {
 	        key: 'mapEmotions',
