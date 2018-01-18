@@ -1,4 +1,6 @@
-/* global require */
+/* global require, Image, console */
+
+import { bett } from '../../../_assets';
 
 const Timeline = require('gsap/src/minified/TimelineMax.min');
 
@@ -10,11 +12,32 @@ export default class FrameStep {
 
         this.imageElement = imageElement;
         this.canvas = canvas;
+
+        this.scale = this.canvas.width / this.imageElement.width;
+
         this.context = context;
         this.killAnimation = false;
         this.canvasUtils = new CanvasUtils(imageElement, canvas, context);
-        this.borderWidth = 28;
-        this.circlePadding = 50;
+        this.borderWidth = this.scaled(40);
+        this.circlePadding = this.scaled(200);
+
+        this.bettFrame = new Image();
+        this.bettFrame.src = bett.faceCircle;
+
+        this.emotions = {};
+
+        for(const emotion in bett.emotions) {
+
+            this.emotions[emotion] = {
+                icon: new Image(),
+                color: bett.emotions[emotion].color
+            };
+
+            this.emotions[emotion]['icon'].src = bett.emotions[emotion].icon;
+
+        }
+
+        console.info(this.emotions);
 
         this.draw(duration);
 
@@ -71,6 +94,7 @@ export default class FrameStep {
         this.drawOverlay(progress, height);
         this.drawDots(progress, height);
         this.cutHole(progress);
+        this.drawResults(progress);
         this.drawBorder(progress, height);
     }
 
@@ -78,10 +102,10 @@ export default class FrameStep {
 
         const width = this.canvas.width;
 
-        const hSpacing = 25;
+        const hSpacing = this.scaled(25);
         const vSpacing = 0;
 
-        const radius = 10;
+        const radius = this.scaled(10);
 
         const rows = (height / (vSpacing + (radius * 2)));
         const cols = (width / (hSpacing + (radius * 2)));
@@ -116,8 +140,8 @@ export default class FrameStep {
         this.context.beginPath();
 
         const bounds = this.imageElement.faceBounds;
-        const scale = this.canvas.width / this.imageElement.width;
-        const width = (bounds.right - bounds.left) * scale;
+
+        const width = (bounds.right - bounds.left) * this.scale;
 
         const x = this.imageElement.eyesMidpoint.x;
         const y = this.imageElement.eyesMidpoint.y;
@@ -130,6 +154,112 @@ export default class FrameStep {
         this.context.closePath();
         this.context.restore();
 
+        this.context.drawImage(this.bettFrame, x - ((width + (this.circlePadding * 2)) / 2), y - ((width + (this.circlePadding * 2)) / 2), width + (this.circlePadding * 2), width + (this.circlePadding * 2));
+
+
+
+    }
+
+    drawResults(/*progress = 0*/) {
+
+        this.context.save();
+        this.context.beginPath();
+
+        const y = this.scaled(2200);
+        const width = this.scaled(1000);
+        const height = this.scaled(150);
+
+        const emotions = this.mapEmotions(this.imageElement.facesAndStrongestEmotions);
+
+        this.context.rect(0, y, width, height);
+        this.context.strokeStyle = '#000000';
+        this.context.lineWidth = this.borderWidth / 1.5;
+        this.context.fillStyle = emotions.barColor;
+
+        this.context.shadowOffsetX = 5;
+        this.context.shadowOffsetY = 5;
+        this.context.shadowBlur= 10;
+        this.context.shadowColor = 'rgba(0, 0, 0, 0.5)';
+
+        this.context.stroke();
+        this.context.fill();
+
+        this.context.closePath();
+        this.context.restore();
+
+        const padding = this.scaled(100);
+
+        const iconHeight = height - 20;
+        const iconWidth = iconHeight;
+
+        let index = 0;
+        const lMargin = this.scaled(120);
+
+        for(const emotion in this.emotions) {
+
+            const icon = this.emotions[emotion].icon;
+
+            const iconY = y + (height / 2) - (iconHeight / 2);
+            const iconX = (index === 0) ? (lMargin) : ((padding + iconWidth) * index) + lMargin;
+
+            // Draw the faces
+            this.context.drawImage(icon, iconX, iconY, iconWidth, iconHeight);
+
+            index++;
+
+        }
+
+        this.context.closePath();
+        this.context.restore();
+
+    }
+
+    mapEmotions(faceAndEmotions) {
+
+        const output = {
+            levels: {
+                joy: 0,
+                sorrow: 0,
+                anger: 0,
+                confusion: 0
+            },
+            barColor: '#000000'
+        };
+
+        const levels = {
+            UNKNOWN: 0,
+            VERY_UNLIKELY: 20,
+            UNLIKELY: 40,
+            POSSIBLE: 60,
+            LIKELY: 80,
+            VERY_LIKELY: 100
+        };
+
+        faceAndEmotions.forEach((face) => {
+
+            for(const emotion in face) {
+                output.levels[emotion.toLowerCase()] = Math.max(levels[face[emotion]], output.levels[emotion.toLowerCase()])
+            }
+
+        });
+
+        // Get first color
+        const dominant = { emotion: 'unknown', level: 0};
+
+        for(const emotion in output.levels) {
+            if(output.levels[emotion] > dominant.level) {
+                dominant.emotion = emotion;
+                dominant.level = output.levels[emotion];
+            }
+        }
+
+        output.barColor = (dominant.emotion === 'unknown') ? '#FFFFFF' : this.emotions[dominant.emotion].color;
+
+        return output;
+    }
+
+    scaled(value) {
+        return value * this.scale;
     }
 
     drawDot(x, y, radius, color = 'rgba(170, 170, 170, 1)') {
