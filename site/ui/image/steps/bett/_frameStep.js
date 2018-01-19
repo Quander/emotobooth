@@ -1,10 +1,9 @@
 /* global require, Image, console */
 
 import { bett } from '../../../_assets';
+import CanvasUtils from '../../_canvasUtils';
 
 const Timeline = require('gsap/src/minified/TimelineMax.min');
-
-import CanvasUtils from '../../_canvasUtils';
 
 export default class FrameStep {
 
@@ -30,14 +29,19 @@ export default class FrameStep {
 
             this.emotions[emotion] = {
                 icon: new Image(),
-                color: bett.emotions[emotion].color
+                color: bett.emotions[emotion].color,
+                graphic: {
+                    image: new Image(),
+                    frame: bett.emotions[emotion].graphic.frame
+                }
             };
 
-            this.emotions[emotion]['icon'].src = bett.emotions[emotion].icon;
+            this.emotions[emotion].icon.src = bett.emotions[emotion].icon;
+            this.emotions[emotion].graphic.image.src = bett.emotions[emotion].graphic.src;
 
         }
 
-        console.info(this.emotions);
+        this.mappedEmotions = this.mapEmotions(this.imageElement.facesAndStrongestEmotions);
 
         this.draw(duration);
 
@@ -95,6 +99,8 @@ export default class FrameStep {
         this.drawDots(progress, height);
         this.cutHole(progress);
         this.drawResults(progress);
+
+        this.drawGraphics();
         this.drawBorder(progress, height);
     }
 
@@ -134,6 +140,31 @@ export default class FrameStep {
         this.context.restore();
     }
 
+    drawGraphics() {
+
+        for(const emotion in this.mappedEmotions.levels) {
+            const level = this.mappedEmotions.levels[emotion];
+            if(level > 0) {
+
+                this.context.save();
+                this.context.beginPath();
+
+                const graphic = this.emotions[emotion].graphic;
+                const width = this.scaled(graphic.frame.width);
+                const height = this.scaled(graphic.frame.height);
+
+                const x = (graphic.frame.gravity === 'right') ? this.canvas.width - (width + this.scaled(graphic.frame.padding.r)) : this.scaled(graphic.frame.padding.l);
+
+                this.context.drawImage(graphic.image, x, 0, width, height);
+
+                this.context.closePath();
+                this.context.restore();
+
+            }
+        }
+
+    }
+
     cutHole(progress = 0) {
 
         this.context.save();
@@ -168,12 +199,10 @@ export default class FrameStep {
 
         const y = this.canvas.height - (this.scaled(100) + height);
 
-        const emotions = this.mapEmotions(this.imageElement.facesAndStrongestEmotions);
-
         this.context.rect(0, y, width, height);
         this.context.strokeStyle = '#000000';
         this.context.lineWidth = this.borderWidth / 1.5;
-        this.context.fillStyle = emotions.barColor;
+        this.context.fillStyle = this.mappedEmotions.barColor;
 
         this.context.shadowOffsetX = 5;
         this.context.shadowOffsetY = 5;
@@ -204,12 +233,9 @@ export default class FrameStep {
             // Draw the faces
             this.context.drawImage(icon, iconX, iconY, iconWidth, iconHeight);
 
-            if(emotions.levels[emotion] > 0) {
-                this.drawResultBars(this.context, iconX, y, iconWidth, emotions.levels[emotion]);
+            if(this.mappedEmotions.levels[emotion] > 0) {
+                this.drawResultBars(this.context, iconX, y, iconWidth, this.mappedEmotions.levels[emotion]);
             }
-
-            console.log(iconY);
-            console.log(this.canvas.height);
 
             index++;
 
