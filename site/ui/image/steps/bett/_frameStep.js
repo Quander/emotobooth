@@ -1,4 +1,4 @@
-/* global require, Image, console */
+/* global require, Image, console, Promise */
 
 import { bett } from '../../../_assets';
 import CanvasUtils from '../../_canvasUtils';
@@ -7,21 +7,29 @@ const Timeline = require('gsap/src/minified/TimelineMax.min');
 
 export default class FrameStep {
 
-    constructor(imageElement, canvas, context, duration) {
+    constructor(imageElement, canvas, context, duration = 2) {
 
         this.imageElement = imageElement;
         this.canvas = canvas;
 
+        this.context = context;
+        this.duration = duration;
+
+    }
+
+    load() {
+
         this.scale = this.canvas.width / this.imageElement.width;
 
-        this.context = context;
         this.killAnimation = false;
-        this.canvasUtils = new CanvasUtils(imageElement, canvas, context);
+        this.canvasUtils = new CanvasUtils(this.imageElement, this.canvas, this.context);
         this.borderWidth = this.scaled(40);
         this.circlePadding = this.scaled(200);
 
+        const promises = [];
+
         this.bettFrame = new Image();
-        this.bettFrame.src = bett.faceCircle;
+        promises.push(this.loadImage(this.bettFrame, bett.faceCircle));
 
         this.emotions = {};
 
@@ -37,14 +45,14 @@ export default class FrameStep {
                 }
             };
 
-            this.emotions[emotion].icon.src = bett.emotions[emotion].icon;
-            this.emotions[emotion].graphic.image.src = bett.emotions[emotion].graphic.src;
+            promises.push(this.loadImage(this.emotions[emotion].icon, bett.emotions[emotion].icon));
+            promises.push(this.loadImage(this.emotions[emotion].graphic.image, bett.emotions[emotion].graphic.src));
 
         }
 
         this.mappedEmotions = this.mapEmotions(this.imageElement.facesAndStrongestEmotions);
 
-        this.draw(duration);
+        return Promise.all(promises);
 
     }
 
@@ -55,7 +63,20 @@ export default class FrameStep {
         this.context = null;
     }
 
+    loadImage(image, src) {
+
+        return new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = reject;
+            image.src = src;
+        });
+
+    }
+
+
     draw(duration = 2) {
+
+        this.duration = duration;
 
         if(this.killAnimation) {
             return;
@@ -63,7 +84,7 @@ export default class FrameStep {
 
         this.canvasUtils.redrawCurrentCanvas();
 
-        if(duration === 0) {
+        if(this.duration === 0) {
             this.drawFrame(1);
             return;
         }
@@ -76,7 +97,7 @@ export default class FrameStep {
 
         let currActive = null;
 
-        timeline.to(this, duration, {
+        timeline.to(this, this.duration, {
             onStart: () => {
                 currActive = timeline.getActive()[0];
                 this.imageElement.tweens.push(currActive);
@@ -151,6 +172,7 @@ export default class FrameStep {
         this.context.fill();
         this.context.closePath();
         this.context.restore();
+
     }
 
     drawGraphics() {
@@ -396,6 +418,7 @@ export default class FrameStep {
         this.context.fill();
         this.context.closePath();
         this.context.restore();
+
     }
 
     drawBorder(progress, height = 112) {

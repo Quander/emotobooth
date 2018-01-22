@@ -7,6 +7,9 @@ import Threeup from './threeup';
 
 import Controls from './controls';
 
+require('phantomjs-polyfill');
+require('es6-promise').polyfill();
+
 let zoom = false;
 let controls = false;
 let showGrid = false;

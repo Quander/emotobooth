@@ -40,7 +40,9 @@ export default class Panel {
       });
     } else if (this.eventName === EVENT_NAME_BETT) {
       this.image = new bettImageElement(this.imagePath, this.respPath, () => {
-        this.imageIsReady()
+        this.image.load().then(() => {
+          this.imageIsReady()
+        })
       })
     }
 

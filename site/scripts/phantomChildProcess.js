@@ -3,12 +3,11 @@
 
 var page = require('webpage').create();
 var args = require('system').args;
+require('phantomjs-polyfill');
 
 page.onConsoleMessage = function(msg) {
   console.info('console: ' + msg);
 };
-
-console.info('Args', args[3]);
 
 page.open('http://localhost:8080/single?timing=' + args[3] + '&', function(status) {
 
@@ -18,7 +17,7 @@ page.open('http://localhost:8080/single?timing=' + args[3] + '&', function(statu
         page.render(args[2], {format: 'jpeg', quality: '100'});
         //page.close();
         phantom.exit();
-      }, 5000);
+      }, 2000);
     } else {
       console.info(page.injectJs(args[1]));
       //page.close();
@@ -29,4 +28,5 @@ page.open('http://localhost:8080/single?timing=' + args[3] + '&', function(statu
     //page.close();
     phantom.exit();
   }
+
 });

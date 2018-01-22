@@ -1,4 +1,4 @@
-/* global single, document, require, states, requestAnimationFrame */
+/* global single, document, require, states, requestAnimationFrame, Promise */
 
 'use strict';
 
@@ -84,6 +84,10 @@ export default class ImageElement extends PanelComponent {
 
     }
 
+    load() {
+        return Promise.all([this.frameStep.load()]);
+    }
+
     init() {
 
         if (this.imageElement) {
@@ -110,6 +114,7 @@ export default class ImageElement extends PanelComponent {
 
         this.faceStep = new FaceStep(this, this.canvas, this.context);
         this.zoomStep = new ZoomStep(this, this.canvas, this.context);
+        this.frameStep = new FrameStep(this, this.canvas, this.context);
 
         animationUtils.setSmoothing(this.context);
 
@@ -285,7 +290,7 @@ export default class ImageElement extends PanelComponent {
     }
 
     animateInFrame(duration = 0) {
-        this.frameStep = new FrameStep(this, this.canvas, this.context, duration);
+        this.frameStep.draw(duration);
     }
 
     animateInHalo(duration = 0) {
