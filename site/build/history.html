@@ -74,10 +74,14 @@
 
             sessionKeys.forEach((key) => {
               sessionImages.push(session[key]);
+              let wrapper = document.createElement('div');
+              wrapper.classList.add('history-item');
+
               let img = document.createElement('img');
               img.classList.add('history-image');
-              img.setAttribute('src', session[key].origPath);
-              sessionImgsWrap.appendChild(img);
+              img.setAttribute('src', session[key].finalPath);
+
+              sessionImgsWrap.appendChild(wrapper);
             });
 
             main.appendChild(sessDiv);

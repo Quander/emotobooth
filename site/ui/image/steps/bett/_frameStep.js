@@ -1,4 +1,4 @@
-/* global require, Image, console, Promise */
+/* global require, Image, Promise */
 
 import { bett } from '../../../_assets';
 import CanvasUtils from '../../_canvasUtils';
@@ -50,7 +50,7 @@ export default class FrameStep {
 
         }
 
-        this.mappedEmotions = this.mapEmotions(this.imageElement.facesAndStrongestEmotions);
+        this.mappedEmotions = this.mapEmotions(this.imageElement.facesAndEmotions);
 
         return Promise.all(promises);
 
@@ -337,16 +337,16 @@ export default class FrameStep {
                 joy: 0,
                 sorrow: 0,
                 anger: 0,
-                surprised: 0
+                surprise: 0
             },
             barColor: '#000000',
             count: 0,
             layout: {
                 left: {
-                    emotion: this.emotions.surprised
+                    emotion: null
                 },
                 right: {
-                    emotion: this.emotions.sorrow
+                    emotion: null
                 }
             }
         };
@@ -369,29 +369,17 @@ export default class FrameStep {
         });
 
         // Get first color
-        const dominant = { emotion: 'unknown', level: 0};
+        const dominant = { emotion: null, level: 0};
+
+        const highest = [];
 
         // TODO: Create algorithm to setup levels, layout and color bar
-        output.levels = {
-            joy: 100,
-            sorrow: 70,
-            anger: 80,
-            surprised: 100
-        };
 
-        output.layout = {
-            left: {
-                emotion: this.emotions.joy
-            },
-            right: {
-                emotion: this.emotions.surprised
-            }
-        };
-
-        for(const emotion in output.levels) {
+        for (const emotion in output.levels) {
 
             if(output.levels[emotion] > 0) {
                 output.count += 1;
+                highest.push({ emotion: emotion, level: output.levels[emotion]});
             }
 
             if(output.levels[emotion] > dominant.level) {
@@ -400,7 +388,22 @@ export default class FrameStep {
             }
         }
 
-        output.barColor = (dominant.emotion === 'unknown') ? '#000000' : this.emotions[dominant.emotion].color;
+        if(highest.length > 1) {
+
+            highest.sort((a, b) => {
+                return this.emotions[a.emotion].graphic.frame.gravity.r < this.emotions[b.emotion].graphic.frame.gravity.r
+            });
+
+            output.layout.right.emotion = this.emotions[highest[0].emotion];
+            output.layout.left.emotion = this.emotions[highest[1].emotion];
+
+        } else if(highest.length === 1) {
+
+            output.layout.right.emotion = this.emotions[highest[0].emotion];
+
+        }
+
+        output.barColor = (dominant.emotion === null) ? '#000000' : this.emotions[dominant.emotion].color;
 
         return output;
     }

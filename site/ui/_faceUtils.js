@@ -49,6 +49,7 @@ export function generateFacesAndEmotions(faces = [], strongestOnly = false) {
     if (face.surpriseLikelihood !== 'VERY_UNLIKELY') {
       emotions.SURPRISE = face.surpriseLikelihood;
     }
+
     if (!strongestOnly) {
       facesAndEmotions.push(emotions);
     } else {
