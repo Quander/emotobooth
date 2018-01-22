@@ -9784,10 +9784,10 @@
 	            this.canvasUtils.redrawCurrentCanvas();
 	            this.drawOverlay(progress, height);
 	            this.drawDots(progress, height);
+	            this.drawGraphics();
 	            this.cutHole(progress);
 	            this.drawResults(progress);
 	
-	            this.drawGraphics();
 	            this.drawBorder(progress, height);
 	        }
 	    }, {
@@ -9798,10 +9798,10 @@
 	
 	            var width = this.canvas.width;
 	
-	            var hSpacing = this.scaled(25);
-	            var vSpacing = 0;
+	            var hSpacing = this.scaled(27);
+	            var vSpacing = this.scaled(0);
 	
-	            var radius = this.scaled(10);
+	            var radius = this.scaled(8);
 	
 	            var rows = height / (vSpacing + radius * 2);
 	            var cols = width / (hSpacing + radius * 2);
@@ -9811,7 +9811,7 @@
 	                var offset = 0 === rowI % 2 ? hSpacing / 2 + radius : 0;
 	
 	                for (var colI = 0; colI < cols; colI++) {
-	                    this.drawDot(offset + colI * (hSpacing + radius * 2), rowI * (vSpacing + radius * 2), radius, 'rgba(170, 170, 170, ' + progress + ')');
+	                    this.drawDot(offset + colI * (hSpacing + radius * 2), rowI * (vSpacing + radius * 2), radius, 'rgba(170, 170, 170, ' + 0.6 * progress + ')');
 	                }
 	            }
 	        }
@@ -9822,10 +9822,17 @@
 	
 	            var alpha = 0.56 * progress;
 	            var color = 'rgba(255, 255, 255, ' + alpha + ')';
+	
 	            this.context.save();
 	            this.context.beginPath();
+	
+	            var gradient = this.context.createLinearGradient(0, 0, this.canvas.width, 0);
+	            gradient.addColorStop(0, this.hexToRGBA(this.emotions.joy.color, 0.5));
+	            gradient.addColorStop(1, this.hexToRGBA(this.emotions.anger.color, 0.5));
+	
 	            this.context.rect(0, 0, this.canvas.width, height);
-	            this.context.fillStyle = color;
+	            this.context.fillStyle = gradient;
+	
 	            this.context.fill();
 	            this.context.closePath();
 	            this.context.restore();
@@ -9834,8 +9841,12 @@
 	        key: 'drawGraphics',
 	        value: function drawGraphics() {
 	
+	            // Need to pick the most dominant 2 graphics
+	
 	            for (var emotion in this.mappedEmotions.levels) {
+	
 	                var level = this.mappedEmotions.levels[emotion];
+	
 	                if (level > 0) {
 	
 	                    this.context.save();
@@ -9845,14 +9856,28 @@
 	                    var width = this.scaled(graphic.frame.width);
 	                    var height = this.scaled(graphic.frame.height);
 	
-	                    var x = graphic.frame.gravity === 'right' ? this.canvas.width - (width + this.scaled(graphic.frame.padding.r)) : this.scaled(graphic.frame.padding.l);
+	                    var x = graphic.frame.gravity === 'right' || this.mappedEmotions.count <= 1 ? this.canvas.width - (width + this.scaled(graphic.frame.padding.r)) : this.scaled(graphic.frame.padding.l);
 	
-	                    this.context.drawImage(graphic.image, x, 0, width, height);
+	                    this.context.drawImage(graphic.image, x, graphic.frame.padding.t, width, height);
 	
 	                    this.context.closePath();
 	                    this.context.restore();
 	                }
 	            }
+	        }
+	    }, {
+	        key: 'hexToRGBA',
+	        value: function hexToRGBA(hex, alpha) {
+	            var c = void 0;
+	            if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+	                c = hex.substring(1).split('');
+	                if (c.length === 3) {
+	                    c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+	                }
+	                c = '0x' + c.join('');
+	                return 'rgba(' + [c >> 16 & 255, c >> 8 & 255, c & 255].join(', ') + ', ' + alpha + ')';
+	            }
+	            throw new Error('Bad Hex');
 	        }
 	    }, {
 	        key: 'cutHole',
@@ -9976,7 +10001,8 @@
 	                    anger: 0,
 	                    confusion: 0
 	                },
-	                barColor: '#000000'
+	                barColor: '#000000',
+	                count: 0
 	            };
 	
 	            var levels = {
@@ -9999,6 +10025,11 @@
 	            var dominant = { emotion: 'unknown', level: 0 };
 	
 	            for (var emotion in output.levels) {
+	
+	                if (output.levels[emotion] > 0) {
+	                    output.count += 1;
+	                }
+	
 	                if (output.levels[emotion] > dominant.level) {
 	                    dominant.emotion = emotion;
 	                    dominant.level = output.levels[emotion];

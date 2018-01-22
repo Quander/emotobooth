@@ -97,21 +97,22 @@ export default class FrameStep {
         this.canvasUtils.redrawCurrentCanvas();
         this.drawOverlay(progress, height);
         this.drawDots(progress, height);
+        this.drawGraphics();
         this.cutHole(progress);
         this.drawResults(progress);
 
-        this.drawGraphics();
         this.drawBorder(progress, height);
+
     }
 
     drawDots(progress, height = 112) {
 
         const width = this.canvas.width;
 
-        const hSpacing = this.scaled(25);
-        const vSpacing = 0;
+        const hSpacing = this.scaled(27);
+        const vSpacing = this.scaled(0);
 
-        const radius = this.scaled(10);
+        const radius = this.scaled(8);
 
         const rows = (height / (vSpacing + (radius * 2)));
         const cols = (width / (hSpacing + (radius * 2)));
@@ -121,7 +122,7 @@ export default class FrameStep {
             const offset = (0 === rowI % 2) ? (hSpacing / 2) + radius : 0;
 
             for(let colI = 0; colI < cols; colI++) {
-                this.drawDot(offset + (colI * (hSpacing + (radius * 2))), rowI * (vSpacing + (radius * 2)), radius, `rgba(170, 170, 170, ${ progress })`);
+                this.drawDot(offset + (colI * (hSpacing + (radius * 2))), rowI * (vSpacing + (radius * 2)), radius, `rgba(170, 170, 170, ${ 0.6 * progress })`);
             }
 
         }
@@ -131,10 +132,17 @@ export default class FrameStep {
     drawOverlay(progress, height = 112) {
         const alpha = 0.56 * progress;
         const color = `rgba(255, 255, 255, ${ alpha })`;
+
         this.context.save();
         this.context.beginPath();
+
+        const gradient = this.context.createLinearGradient(0, 0, this.canvas.width, 0);
+        gradient.addColorStop(0, this.hexToRGBA(this.emotions.joy.color, 0.5));
+        gradient.addColorStop(1, this.hexToRGBA(this.emotions.anger.color, 0.5));
+
         this.context.rect(0, 0, this.canvas.width, height);
-        this.context.fillStyle = color;
+        this.context.fillStyle = gradient;
+
         this.context.fill();
         this.context.closePath();
         this.context.restore();
@@ -142,8 +150,12 @@ export default class FrameStep {
 
     drawGraphics() {
 
+        // Need to pick the most dominant 2 graphics
+
         for(const emotion in this.mappedEmotions.levels) {
+
             const level = this.mappedEmotions.levels[emotion];
+
             if(level > 0) {
 
                 this.context.save();
@@ -153,16 +165,30 @@ export default class FrameStep {
                 const width = this.scaled(graphic.frame.width);
                 const height = this.scaled(graphic.frame.height);
 
-                const x = (graphic.frame.gravity === 'right') ? this.canvas.width - (width + this.scaled(graphic.frame.padding.r)) : this.scaled(graphic.frame.padding.l);
+                const x = (graphic.frame.gravity === 'right' || this.mappedEmotions.count <= 1) ? this.canvas.width - (width + this.scaled(graphic.frame.padding.r)) : this.scaled(graphic.frame.padding.l);
 
-                this.context.drawImage(graphic.image, x, 0, width, height);
+                this.context.drawImage(graphic.image, x, graphic.frame.padding.t, width, height);
 
                 this.context.closePath();
                 this.context.restore();
 
             }
+
         }
 
+    }
+
+    hexToRGBA(hex, alpha){
+        let c;
+        if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+            c = hex.substring(1).split('');
+            if(c.length === 3){
+                c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+            }
+            c= `0x${ c.join('') }`;
+            return `rgba(${ [(c>>16)&255, (c>>8)&255, c&255].join(', ') }, ${ alpha })`;
+        }
+        throw new Error('Bad Hex');
     }
 
     cutHole(progress = 0) {
@@ -286,7 +312,8 @@ export default class FrameStep {
                 anger: 0,
                 confusion: 0
             },
-            barColor: '#000000'
+            barColor: '#000000',
+            count: 0
         };
 
         const levels = {
@@ -310,6 +337,11 @@ export default class FrameStep {
         const dominant = { emotion: 'unknown', level: 0};
 
         for(const emotion in output.levels) {
+
+            if(output.levels[emotion] > 0) {
+                output.count += 1;
+            }
+
             if(output.levels[emotion] > dominant.level) {
                 dominant.emotion = emotion;
                 dominant.level = output.levels[emotion];
