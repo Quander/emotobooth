@@ -28,6 +28,7 @@ export default class FrameStep {
         for(const emotion in bett.emotions) {
 
             this.emotions[emotion] = {
+                name: emotion,
                 icon: new Image(),
                 color: bett.emotions[emotion].color,
                 graphic: {
@@ -131,17 +132,21 @@ export default class FrameStep {
 
     drawOverlay(progress, height = 112) {
         const alpha = 0.56 * progress;
-        const color = `rgba(255, 255, 255, ${ alpha })`;
 
         this.context.save();
         this.context.beginPath();
 
-        const gradient = this.context.createLinearGradient(0, 0, this.canvas.width, 0);
-        gradient.addColorStop(0, this.hexToRGBA(this.emotions.joy.color, 0.5));
-        gradient.addColorStop(1, this.hexToRGBA(this.emotions.anger.color, 0.5));
+        // Default style
+        let style = `rgba(255, 255, 255, ${ alpha })`;
+
+        if(this.mappedEmotions.layout.left.emotion) {
+            style = this.context.createLinearGradient(0, 0, this.canvas.width, 0);
+            style.addColorStop(0, FrameStep.hexToRGBA(this.mappedEmotions.layout.left.emotion.color, 0.5));
+            style.addColorStop(1, FrameStep.hexToRGBA(this.mappedEmotions.layout.right.emotion.color, 0.5));
+        }
 
         this.context.rect(0, 0, this.canvas.width, height);
-        this.context.fillStyle = gradient;
+        this.context.fillStyle = style;
 
         this.context.fill();
         this.context.closePath();
@@ -150,35 +155,35 @@ export default class FrameStep {
 
     drawGraphics() {
 
-        // Need to pick the most dominant 2 graphics
-
-        for(const emotion in this.mappedEmotions.levels) {
-
-            const level = this.mappedEmotions.levels[emotion];
-
-            if(level > 0) {
-
-                this.context.save();
-                this.context.beginPath();
-
-                const graphic = this.emotions[emotion].graphic;
-                const width = this.scaled(graphic.frame.width);
-                const height = this.scaled(graphic.frame.height);
-
-                const x = (graphic.frame.gravity === 'right' || this.mappedEmotions.count <= 1) ? this.canvas.width - (width + this.scaled(graphic.frame.padding.r)) : this.scaled(graphic.frame.padding.l);
-
-                this.context.drawImage(graphic.image, x, graphic.frame.padding.t, width, height);
-
-                this.context.closePath();
-                this.context.restore();
-
+        for(const position in this.mappedEmotions.layout) {
+            const layout = this.mappedEmotions.layout[position];
+            if(layout.emotion) {
+                this.drawGraphic(position, layout.emotion);
             }
-
         }
 
     }
 
-    hexToRGBA(hex, alpha){
+    drawGraphic(position, emotion) {
+
+        this.context.save();
+        this.context.beginPath();
+
+        const graphic = emotion.graphic;
+        const width = this.scaled(graphic.frame.width);
+        const height = this.scaled(graphic.frame.height);
+
+        const x = (position === 'right') ? this.canvas.width - (width + this.scaled(graphic.frame.padding.r)) : this.scaled(graphic.frame.padding.l);
+        const y = (graphic.frame.gravity.b > 0) ? this.canvas.height - (height + this.scaled(graphic.frame.padding.b)) : graphic.frame.padding.t;
+
+        this.context.drawImage(graphic.image, x, y, width, height);
+
+        this.context.closePath();
+        this.context.restore();
+
+    }
+
+    static hexToRGBA(hex, alpha){
         let c;
         if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
             c = hex.substring(1).split('');
@@ -310,10 +315,18 @@ export default class FrameStep {
                 joy: 0,
                 sorrow: 0,
                 anger: 0,
-                confusion: 0
+                surprised: 0
             },
             barColor: '#000000',
-            count: 0
+            count: 0,
+            layout: {
+                left: {
+                    emotion: this.emotions.surprised
+                },
+                right: {
+                    emotion: this.emotions.sorrow
+                }
+            }
         };
 
         const levels = {
@@ -335,6 +348,23 @@ export default class FrameStep {
 
         // Get first color
         const dominant = { emotion: 'unknown', level: 0};
+
+        // TODO: Create algorithm to setup levels, layout and color bar
+        output.levels = {
+            joy: 100,
+            sorrow: 70,
+            anger: 80,
+            surprised: 100
+        };
+
+        output.layout = {
+            left: {
+                emotion: this.emotions.joy
+            },
+            right: {
+                emotion: this.emotions.surprised
+            }
+        };
 
         for(const emotion in output.levels) {
 
