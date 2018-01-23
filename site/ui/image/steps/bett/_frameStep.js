@@ -161,7 +161,9 @@ export default class FrameStep {
         this.context.beginPath();
 
         // Default style
-        let style = `rgba(255, 255, 255, ${ alpha })`;
+        const defaultColor = (this.mappedEmotions.layout.right) ? this.mappedEmotions.layout.right.emotion.color : '#FFFFFF';
+
+        let style = FrameStep.hexToRGBA(defaultColor, alpha);
 
         if(this.mappedEmotions.layout.left.emotion) {
             style = this.context.createLinearGradient(0, 0, this.canvas.width, 0);
