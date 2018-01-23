@@ -57,10 +57,12 @@ export default class FrameStep {
     }
 
     kill() {
+
         this.killAnimation = true;
         this.imageElement = null;
         this.canvas = null;
         this.context = null;
+
     }
 
     loadImage(image, src) {
@@ -152,6 +154,7 @@ export default class FrameStep {
     }
 
     drawOverlay(progress, height = 112) {
+
         const alpha = 0.56 * progress;
 
         this.context.save();
@@ -170,6 +173,7 @@ export default class FrameStep {
         this.context.fillStyle = style;
 
         this.context.fill();
+
         this.context.closePath();
         this.context.restore();
 
@@ -206,16 +210,25 @@ export default class FrameStep {
     }
 
     static hexToRGBA(hex, alpha){
+
         let c;
+
         if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+
             c = hex.substring(1).split('');
+
             if(c.length === 3){
                 c= [c[0], c[0], c[1], c[1], c[2], c[2]];
             }
+
             c= `0x${ c.join('') }`;
+
             return `rgba(${ [(c>>16)&255, (c>>8)&255, c&255].join(', ') }, ${ alpha })`;
+
         }
+
         throw new Error('Bad Hex');
+
     }
 
     cutHole(progress = 0) {
@@ -304,8 +317,8 @@ export default class FrameStep {
         const height = this.scaled(20);
         const bMargin = this.scaled(30);
         const bPadding = this.scaled(20);
-        const bars = result / 20;
 
+        const bars = result / 20;
 
         for(let i = 0; i < bars; i++) {
 
@@ -374,7 +387,6 @@ export default class FrameStep {
         const highest = [];
 
         // TODO: Create algorithm to setup levels, layout and color bar
-
         for (const emotion in output.levels) {
 
             if(output.levels[emotion] > 0) {
@@ -388,7 +400,7 @@ export default class FrameStep {
             }
         }
 
-        if(highest.length > 1) {
+        if (highest.length > 1) {
 
             highest.sort((a, b) => {
                 return this.emotions[a.emotion].graphic.frame.gravity.r < this.emotions[b.emotion].graphic.frame.gravity.r
@@ -397,7 +409,7 @@ export default class FrameStep {
             output.layout.right.emotion = this.emotions[highest[0].emotion];
             output.layout.left.emotion = this.emotions[highest[1].emotion];
 
-        } else if(highest.length === 1) {
+        } else if (highest.length === 1) {
 
             output.layout.right.emotion = this.emotions[highest[0].emotion];
 
@@ -406,19 +418,24 @@ export default class FrameStep {
         output.barColor = (dominant.emotion === null) ? '#000000' : this.emotions[dominant.emotion].color;
 
         return output;
+
     }
 
     scaled(value) {
+
         return value * this.scale;
+
     }
 
     drawDot(x, y, radius, color = 'rgba(170, 170, 170, 1)') {
 
         this.context.save();
         this.context.beginPath();
+
         this.context.arc(x, y, radius, 0, 2 * Math.PI, false);
         this.context.fillStyle = color;
         this.context.fill();
+
         this.context.closePath();
         this.context.restore();
 
@@ -428,11 +445,13 @@ export default class FrameStep {
 
         this.context.save();
         this.context.beginPath();
+
         this.context.globalCompositeOperation = 'source-over';
         this.context.rect(0, 0, this.canvas.width, height);
         this.context.strokeStyle = '#000000';
         this.context.lineWidth = this.borderWidth;
         this.context.stroke();
+
         this.context.closePath();
         this.context.restore();
 

@@ -9759,6 +9759,7 @@
 	    }, {
 	        key: 'kill',
 	        value: function kill() {
+	
 	            this.killAnimation = true;
 	            this.imageElement = null;
 	            this.canvas = null;
@@ -9863,6 +9864,7 @@
 	        value: function drawOverlay(progress) {
 	            var height = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 112;
 	
+	
 	            var alpha = 0.56 * progress;
 	
 	            this.context.save();
@@ -9881,6 +9883,7 @@
 	            this.context.fillStyle = style;
 	
 	            this.context.fill();
+	
 	            this.context.closePath();
 	            this.context.restore();
 	        }
@@ -10003,6 +10006,7 @@
 	            var height = this.scaled(20);
 	            var bMargin = this.scaled(30);
 	            var bPadding = this.scaled(20);
+	
 	            var bars = result / 20;
 	
 	            for (var i = 0; i < bars; i++) {
@@ -10071,7 +10075,6 @@
 	            var highest = [];
 	
 	            // TODO: Create algorithm to setup levels, layout and color bar
-	
 	            for (var emotion in output.levels) {
 	
 	                if (output.levels[emotion] > 0) {
@@ -10105,6 +10108,7 @@
 	    }, {
 	        key: 'scaled',
 	        value: function scaled(value) {
+	
 	            return value * this.scale;
 	        }
 	    }, {
@@ -10115,9 +10119,11 @@
 	
 	            this.context.save();
 	            this.context.beginPath();
+	
 	            this.context.arc(x, y, radius, 0, 2 * Math.PI, false);
 	            this.context.fillStyle = color;
 	            this.context.fill();
+	
 	            this.context.closePath();
 	            this.context.restore();
 	        }
@@ -10129,26 +10135,35 @@
 	
 	            this.context.save();
 	            this.context.beginPath();
+	
 	            this.context.globalCompositeOperation = 'source-over';
 	            this.context.rect(0, 0, this.canvas.width, height);
 	            this.context.strokeStyle = '#000000';
 	            this.context.lineWidth = this.borderWidth;
 	            this.context.stroke();
+	
 	            this.context.closePath();
 	            this.context.restore();
 	        }
 	    }], [{
 	        key: 'hexToRGBA',
 	        value: function hexToRGBA(hex, alpha) {
+	
 	            var c = void 0;
+	
 	            if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+	
 	                c = hex.substring(1).split('');
+	
 	                if (c.length === 3) {
 	                    c = [c[0], c[0], c[1], c[1], c[2], c[2]];
 	                }
+	
 	                c = '0x' + c.join('');
+	
 	                return 'rgba(' + [c >> 16 & 255, c >> 8 & 255, c & 255].join(', ') + ', ' + alpha + ')';
 	            }
+	
 	            throw new Error('Bad Hex');
 	        }
 	    }]);

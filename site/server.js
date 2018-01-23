@@ -894,7 +894,7 @@ app.get('/history-data', authMiddleware, (req, res) => {
       })
     } else {
       res.setHeader('Content-Type', 'application/json');
-      res.send('null');
+      res.send([]);
     }
   });
 });
@@ -967,6 +967,10 @@ io.on('connection', function(socket) {
     callNextJobs('sessionEnd', {
       id: uuid.v4()
     });
+  });
+
+  socket.on('print', (data) => {
+    socket.broadcast.emit('print', data);
   });
 
   // If told not to print from the URL
