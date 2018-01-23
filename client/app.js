@@ -1,3 +1,5 @@
+const host = process.env.API_HOST || 'http://localhost:8080';
+
 const fs = require('fs')
 const unirest = require('unirest')
 const path = require('path')
@@ -5,6 +7,10 @@ const queue = require('queue')
 const chokidar = require('chokidar')
 const winston = require('winston')
 const twillio = require('twilio')
+const uuidv4 = require('uuid/v4')
+const download = require('download')
+
+const socket = require('socket.io-client')(host)
 
 const logger = new (winston.Logger)({
     transports: [
@@ -17,12 +23,29 @@ const q = queue({
   autostart: true
 })
 
+socket.on('connect', () => {
+  logger.log('info', 'Socket connected')
+})
+
+socket.on('print', (data) => {
+  logger.log('info', 'Downloading for print...')
+
+  const out = path.resolve('./print/')
+  const input = `${host}/${data.finalPath}`
+  logger.log('info', `Downloading: ${ input }`)
+
+  download(input, out, { filename: `${data.id}.${uuidv4()}.jpg` }).then(() => {
+    logger.log('info', 'Printing')
+  })
+
+})
+
 var processed = 0
 var failed = 0
 
 function upload(file, callback) {
 
-  unirest.post('http://localhost:8080/photo')
+  unirest.post(`${ host }/photo`)
     .field('username', 'user')
     .field('password', 'pass123')
     .attach('photo', file)
