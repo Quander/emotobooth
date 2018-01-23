@@ -18,13 +18,15 @@ const logger = new (winston.Logger)({
     ]
 })
 
+logger.log('info', `Connecting to host @ ${ host }`)
+
 const q = queue({
   concurrency: 1,
   autostart: true
 })
 
 socket.on('connect', () => {
-  logger.log('info', 'Socket connected')
+  logger.log('info', `Socket connected @ ${ host }`)
 })
 
 socket.on('print', (data) => {
@@ -33,9 +35,10 @@ socket.on('print', (data) => {
   const out = path.resolve('./print/')
   const input = `${host}/${data.finalPath}`
   logger.log('info', `Downloading: ${ input }`)
+  const filename = `${data.id}.${uuidv4()}.jpg`
 
-  download(input, out, { filename: `${data.id}.${uuidv4()}.jpg` }).then(() => {
-    logger.log('info', 'Printing')
+  download(input, out, { filename }).then(() => {
+    logger.log('info', `Printing: ${ filename }`)
   })
 
 })
