@@ -146,7 +146,7 @@ export default class FrameStep {
             const offset = (0 === rowI % 2) ? (hSpacing / 2) + radius : 0;
 
             for(let colI = 0; colI < cols; colI++) {
-                this.drawDot(offset + (colI * (hSpacing + (radius * 2))), rowI * (vSpacing + (radius * 2)), radius, `rgba(170, 170, 170, ${ 0.6 * progress })`);
+                this.drawDot(offset + (colI * (hSpacing + (radius * 2))), rowI * (vSpacing + (radius * 2)), radius, `rgba(170, 170, 170, ${ 0.2 * progress })`);
             }
 
         }

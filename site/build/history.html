@@ -16,8 +16,8 @@
   </header>
 
   <section>
-    <button class="keep-button" value="Keep" onClick="keep()">Keep</button>
-    <button class="kill-button" value="Kill" onClick="kill()">Kill</button>
+    <button id="keep-button" class="keep-button" value="Keep" onClick="keep()">Keep</button>
+    <button id="kill-button" class="kill-button" value="Kill" onClick="kill()">Kill</button>
   </section>
 
     <main class="main">
@@ -34,6 +34,17 @@
           socket.emit('killSession', {});
       }
 
+      socket.on('session_processing', () => {
+          document.getElementById('keep-button').setAttribute('disabled', 'disabled');
+          document.getElementById('kill-button').setAttribute('disabled', 'disabled');
+      });
+
+      socket.on('session_processed', () => {
+          document.getElementById('keep-button').removeAttribute('disabled');
+          document.getElementById('kill-button').removeAttribute('disabled');
+          updateSessions();
+      });
+
       function deleteSession(e) {
         let xhr = new XMLHttpRequest();
         xhr.onreadystatechange = () => {
@@ -43,82 +54,101 @@
         xhr.send();
       }
 
-      let xhr = new XMLHttpRequest();
-      let sessions;
-      let main = document.getElementsByClassName('main')[0];
-      xhr.onreadystatechange = () => {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-          sessions = JSON.parse(xhr.responseText);
-          sessions.sort();
+      function updateSessions() {
+          let xhr = new XMLHttpRequest();
+          let sessions;
+          let main = document.getElementsByClassName('main')[0];
+          main.innerHTML = '';
+          xhr.onreadystatechange = () => {
+              if (xhr.readyState === XMLHttpRequest.DONE) {
 
-          sessions.forEach((session) => {
-            session = JSON.parse(session);
-            sessionKeys = [];
-            sessionImages = [];
+                  sessions = JSON.parse(xhr.responseText);
 
-            let sessDiv = document.createElement('div');
-            sessDiv.classList.add('session');
-            if (session.deleted) {
-              sessDiv.classList.add('deleted');
-            }
+                  sessions.sort((a, b) => {
 
-            let title = document.createElement('h2');
-            if (!session.deleted) {
-              title.innerHTML = session.id;
-            } else {
-              title.innerHTML = `${ session.id } - DELETED`;
-            }
-            sessDiv.appendChild(title);
+                      a = JSON.parse(a);
+                      b = JSON.parse(b);
 
-            if (!session.deleted) {
-              let delButton = document.createElement('button');
-              delButton.setAttribute('data-id', session.id);
-              delButton.classList.add('delete-button');
-              delButton.innerHTML = 'DELETE';
-              delButton.addEventListener("click", deleteSession, false);
-              sessDiv.appendChild(delButton);
-            }
+                      return a.id < b.id;
+
+                  });
+
+                  sessions = sessions.slice(0, 10);
+
+                  sessions.forEach((session) => {
+                      session = JSON.parse(session);
+                      sessionKeys = [];
+                      sessionImages = [];
+
+                      let sessDiv = document.createElement('div');
+                      sessDiv.classList.add('session');
+                      if (session.deleted) {
+                          sessDiv.classList.add('deleted');
+                      }
+
+                      let title = document.createElement('h2');
+                      if (!session.deleted) {
+                          title.innerHTML = session.id;
+                      } else {
+                          title.innerHTML = `${ session.id } - DELETED`;
+                      }
+                      sessDiv.appendChild(title);
+
+                      if (!session.deleted) {
+                          let delButton = document.createElement('button');
+                          delButton.setAttribute('data-id', session.id);
+                          delButton.classList.add('delete-button');
+                          delButton.innerHTML = 'DELETE';
+                          delButton.addEventListener("click", deleteSession, false);
+                          sessDiv.appendChild(delButton);
+                      }
 
 
-            let sessionImgsWrap = document.createElement('div');
-            sessionImgsWrap.classList.add('history-images');
-            sessDiv.appendChild(sessionImgsWrap);
+                      let sessionImgsWrap = document.createElement('div');
+                      sessionImgsWrap.classList.add('history-images');
+                      sessDiv.appendChild(sessionImgsWrap);
 
-            for (let key in session) {
-              if (session.hasOwnProperty(key) && typeof session[key] === 'object') {
-                sessionKeys.push(key.toString());
+                      for (let key in session) {
+                          if (session.hasOwnProperty(key) && typeof session[key] === 'object') {
+                              sessionKeys.push(key.toString());
+                          }
+                      }
+
+                      console.log(session);
+
+                      sessionKeys.forEach((key) => {
+                          sessionImages.push(session[key]);
+                          const wrapper = document.createElement('div');
+                          wrapper.classList.add('history-item');
+
+                          const img = document.createElement('img');
+                          img.classList.add('history-image');
+                          img.setAttribute('src', session[key].finalPath);
+
+                          const printButton = document.createElement('button');
+                          printButton.innerText = 'Print';
+                          printButton.classList.add('print-buttons');
+                          printButton.addEventListener('click', (e) => {
+                              e.preventDefault();
+                              socket.emit('print', session[key])
+                          });
+
+                          wrapper.appendChild(img);
+                          wrapper.appendChild(printButton);
+
+                          sessionImgsWrap.appendChild(wrapper);
+                      });
+
+                      main.appendChild(sessDiv);
+                  })
               }
-            }
+          };
+          xhr.open('GET', '/history-data', true);
+          xhr.send();
+      }
 
-            sessionKeys.forEach((key) => {
-              sessionImages.push(session[key]);
-              const wrapper = document.createElement('div');
-              wrapper.classList.add('history-item');
+      updateSessions();
 
-              const img = document.createElement('img');
-              img.classList.add('history-image');
-              img.setAttribute('src', session[key].finalPath);
-
-              const printButton = document.createElement('button');
-              printButton.innerText = 'Print';
-              printButton.classList.add('print-buttons');
-              printButton.addEventListener('click', (e) => {
-                  e.preventDefault();
-                  socket.emit('print', session[key])
-              });
-
-              wrapper.appendChild(img);
-              wrapper.appendChild(printButton);
-
-              sessionImgsWrap.appendChild(wrapper);
-            });
-
-            main.appendChild(sessDiv);
-          })
-        }
-      };
-      xhr.open('GET', '/history-data', true);
-      xhr.send();
     </script>
   </body>
 </html>

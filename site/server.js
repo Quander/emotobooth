@@ -592,6 +592,9 @@ function compareScore(a,b) {
 }
 
 function processFinalImages(sess) {
+
+  socket.emit('session_processing');
+
   console.log('PROCESS FINAL IMAGES');
   saveSession(sess);
   let incompleteSession = !sess[sess.highestScoredKey].wasProcessed ? sess.highestScoredKey : null;
@@ -617,6 +620,8 @@ function processFinalImages(sess) {
     //sess.highestScoredKey = getHighestScoredKey(sess);
 
     //socket.emit('new_image', JSON.stringify(sess[sess.highestScoredKey]));
+
+    socket.emit('session_processed');
 
     const finalSessionID = (new Date()).getTime();
     sess.id = finalSessionID
@@ -971,6 +976,14 @@ io.on('connection', function(socket) {
 
   socket.on('print', (data) => {
     socket.broadcast.emit('print', data);
+  });
+
+  socket.on('session_processed', () => {
+    socket.broadcast.emit('session_processed');
+  });
+
+  socket.on('session_processing', () => {
+      socket.broadcast.emit('session_processing');
   });
 
   // If told not to print from the URL
