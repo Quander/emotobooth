@@ -28,6 +28,10 @@ export default class ImageElement extends PanelComponent {
         this.canvasWidth = single ? imageConst.BACKEND_CANVAS_WIDTH : imageConst.CANVAS_WIDTH;
         this.canvasHeight = single ? imageConst.BACKEND_CANVAS_HEIGHT : imageConst.CANVAS_HEIGHT;
 
+        if(single) {
+            document.getElementsByTagName('body')[0].classList.add('bett');
+        }
+
         this.canvas = null;
         this.context = null;
 
@@ -214,6 +218,8 @@ export default class ImageElement extends PanelComponent {
             this.allDone = false;
             this.currentFrame = 0;
             this.shapesInit = false;
+
+
         });
     }
 

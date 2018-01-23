@@ -1,9 +1,9 @@
 'use strict';
 
 export const CANVAS_WIDTH = 1080;
-export const CANVAS_HEIGHT = 640;
+export const CANVAS_HEIGHT = 720;
 
-export const BACKEND_CANVAS_WIDTH = CANVAS_WIDTH * 2 - 112;
+export const BACKEND_CANVAS_WIDTH = CANVAS_WIDTH * 2;
 export const BACKEND_CANVAS_HEIGHT = CANVAS_HEIGHT * 2;
 
 export const LOGO_TOP = 40;

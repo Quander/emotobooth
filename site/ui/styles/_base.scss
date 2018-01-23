@@ -8,8 +8,8 @@
   overflow: hidden;
 
   &.single {
-    min-width: $third-width * 2 - 112px;
-    width: $third-width * 2 - 112px;
+    min-width: $third-width * 2;
+    width: $third-width * 2;
     height: $image-height * 2;
     .third {
       width: $third-width * 2 - 112px;
