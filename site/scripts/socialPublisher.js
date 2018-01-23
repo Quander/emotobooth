@@ -49,7 +49,7 @@ module.exports = {
       this.twitter.post('media/upload', {media: photoData}, function(err, media, response){
         if (!err) {
           var status = {
-            status: 'Thanks for visiting the @GCPEmotobooth! See all photos and data from this session → ' + gistUrl,
+            status: 'Thanks for visiting the @GFEBETT2018! See all photos and data from this session → ' + gistUrl,
             media_ids: media.media_id_string
           }
 
